@@ -13,6 +13,6 @@ body,
   margin: 0;
   padding: 0;
   overflow-y: hidden;
-  color: white;
-  background-color: black;
+  color: black;
+  background-color:#FAF9F6;
 }

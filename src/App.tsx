@@ -1,35 +1,42 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-
-function Cube() {
-  return (
-    <mesh>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshNormalMaterial />
-    </mesh>
-  );
-}
+import * as THREE from "three";
+import Ambience from "./components/scene/Ambience";
+import Table from "./components/models/Table";
 
 function App() {
   return (
     <main className="grid place-items-center h-screen bg-base text-text font-sans">
-      {/* 3D Canvas */}
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Cube />
-        <OrbitControls />
-      </Canvas>
+      <Canvas
+        shadows
+        frameloop="demand" // 🔥 only re-renders when scene updates
+        dpr={[1, 1.5]} // 🔥 limits device pixel ratio for performance
+        camera={{ position: [3, 2, 3], fov: 45 }}
+        gl={{
+          antialias: true,
+          powerPreference: "high-performance",
+          toneMapping: THREE.ACESFilmicToneMapping,
+          outputColorSpace: THREE.SRGBColorSpace,
+          shadowMapEnabled: true,
+          shadowMapType: THREE.PCFSoftShadowMap,
+        }}
+      >
+        {/* 🌤 Lighting + Environment */}
+        <Ambience />
 
-      {/* Overlay UI */}
-      <div className="absolute bottom-10 text-center">
-        <h1 className="font-inter text-4xl tracking-wide text-accent">
-          EIGHTFOLD
-        </h1>
-        <p className="font-space-grotesk text-sm opacity-80">
-          Multiplayer 8-Ball Physics Demo
-        </p>
-      </div>
+        {/* 🎱 Pool Table Model */}
+        <Table position={[-0.35, 0, 0]} />
+
+        {/* 🎥 Orbit controls */}
+        <OrbitControls
+          enableDamping
+          dampingFactor={0.05}
+          maxPolarAngle={Math.PI / 2.2}
+          minDistance={1.5}
+          maxDistance={5}
+          enableZoom={false}
+        />
+      </Canvas>
     </main>
   );
 }
