@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import * as THREE from "three";
 import { useRef } from "react";
+import * as THREE from "three";
 
 export function CueStick({ nodes, materials }: { nodes: any; materials: any }) {
   const stickRef = useRef<any>(null);
   const target = new THREE.Vector3();
 
-  useFrame(({ mouse, viewport }) => {
+  useFrame(({ pointer, viewport }) => {
     if (!stickRef.current) return;
 
     // Map mouse movement to 3D space
-    const x = mouse.x * viewport.width * 0.5;
-    const z = -mouse.y * viewport.height * 0.5;
+    const x = pointer.x * viewport.width * 0.5;
+    const z = -pointer.y * viewport.height * 0.5;
 
     // Smooth motion
     target.set(x, 0.85, z + 1);
