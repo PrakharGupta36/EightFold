@@ -7,10 +7,13 @@ import { a, useSpring } from "@react-spring/three";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type JSX } from "react";
+import type { Material, Mesh } from "three";
 import * as THREE from "three";
 import type { GLTF } from "three-stdlib";
-import type { Material, Mesh } from "three";
+
+import { CueStick } from "./Cue-Stick";
+import { CueBall } from "./Cue-Ball";
 
 interface GLTFResult extends GLTF {
   nodes: Record<string, Mesh>;
@@ -23,7 +26,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
   ) as unknown as GLTFResult;
 
   // ⚙️ State
-  const [ready, setReady] = useState(false);
+  const [readyTable, setReadyTable] = useState(false);
   const [visible, setVisible] = useState(true);
   const [removed, setRemoved] = useState(false);
 
@@ -42,7 +45,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     if (triMatRef.current) triMatRef.current.opacity = opacity.get();
   });
 
-  // ⏱ Fade triangle
+  // ⏱ Fade triangle after 2s
   useEffect(() => {
     const fadeTimer = setTimeout(() => setVisible(false), 2000);
     return () => clearTimeout(fadeTimer);
@@ -58,19 +61,18 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     return mat;
   }, [materials.plastic]);
 
-  // 🕒 Delay collider creation until model and transforms fully load
+  // 🕒 Delay collider creation until model + transforms settle
   useEffect(() => {
     if (nodes.Object_36?.geometry) {
-      // Give R3F + Rapier enough time to settle transforms
       const timeout = setTimeout(() => {
-        setReady(true);
+        setReadyTable(true);
         console.log("✅ Table collider initialized after delay");
-      }, 600); // 0.6 seconds delay (tweak as needed)
+      }, 600); // tweak as needed
       return () => clearTimeout(timeout);
     }
   }, [nodes]);
 
-  // 🧱 Table meshes (no balls or sticks)
+  // 🧱 Table geometry (visual only)
   const TableGeometry = (
     <>
       <mesh
@@ -114,9 +116,9 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
 
   return (
     <group {...props} dispose={null}>
-      {/* 🪵 TABLE (physics-accurate after short delay) */}
+      {/* 🪵 TABLE (collider appears after small delay for perfect alignment) */}
       <group position={[0.274, 0, -0.057]} rotation={[0, 0.547, 0]}>
-        {ready ? (
+        {readyTable ? (
           <RigidBody type="fixed" colliders="trimesh">
             {TableGeometry}
           </RigidBody>
@@ -136,6 +138,14 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
           rotation={[-Math.PI, -0.547, -Math.PI]}
           scale={scale.to((s) => 0.239 * s)}
         />
+      )}
+
+      {/* 🎱 Cue Stick (mouse-controlled) */}
+      {readyTable && (
+        <Fragment>
+          <CueStick nodes={nodes} materials={materials} />
+          <CueBall position={[0, 0.82, 1.2]} delay={1200} />
+        </Fragment>
       )}
     </group>
   );

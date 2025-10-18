@@ -7,7 +7,7 @@ import { Suspense, useState } from "react";
 import * as THREE from "three";
 import Table from "./components/models/Table";
 import Ambience from "./components/scene/Ambience";
-import TitleScene from "./components/scene/TitleScene";
+import TitleScene from "./components/scene/Title-Scene";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
