@@ -5,7 +5,7 @@ import {
   Bloom,
   ChromaticAberration,
   EffectComposer,
-  Vignette,
+  Noise,
 } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import { useEffect, useMemo, useRef } from "react";
@@ -21,87 +21,71 @@ export default function TitleScene({
   const textRef = useRef<THREE.Mesh>(null!);
   const movingLight = useRef<THREE.SpotLight>(null!);
   const ballGroup = useRef<THREE.Group>(null!);
-  const { mouse, viewport } = useThree();
+  const { mouse, viewport, gl } = useThree();
 
-  // 🎯 Random fall targets (only computed once)
-  const fallTargets = useRef<number[]>([]);
+  // ♻️ One vector reused per frame (no GC)
+  const tempVec = useMemo(() => new THREE.Vector3(), []);
 
-  useEffect(() => {
-    fallTargets.current = Array.from({ length: 6 }).map(
-      () => -6 - Math.random() * 4
-    ); // random depth fall for each ball
-  }, []);
+  // 🎯 Precomputed fall targets
+  const fallTargets = useMemo(
+    () => Array.from({ length: 6 }, () => -6 - Math.random() * 4),
+    []
+  );
 
-  // 🖱️ Move spotlight + animate balls
-  useFrame(() => {
-    if (movingLight.current) {
-      const x = mouse.x * viewport.width * 1.5;
-      const y = mouse.y * viewport.height * 5.5 + 1.5;
-      movingLight.current.position.lerp(new THREE.Vector3(x, y, 6), 0.1);
-      movingLight.current.target.position.set(0, 0, 0);
-      movingLight.current.target.updateMatrixWorld();
-    }
-
-    if (ballGroup.current) {
-      ballGroup.current.children.forEach((ball, i) => {
-        const mesh = ball as THREE.Mesh;
-
-        // 🌀 Orbit animation (before click)
-        if (!hasClicked) {
-          mesh.position.x = Math.sin(Date.now() * 0.0004 + i) * 1.5;
-          mesh.position.z = Math.cos(Date.now() * 0.0004 + i) * 1.5;
-          mesh.rotation.x += 0.02;
-          mesh.rotation.y += 0.03;
-        }
-
-        // 💥 Fall animation (after click)
-        if (hasClicked) {
-          // Spin faster as falling
-          mesh.rotation.x += 0.15;
-          mesh.rotation.y += 0.18;
-          mesh.rotation.z += 0.18;
-
-          // Smoothly lerp Y toward fall target
-          const targetY = fallTargets.current[i];
-          mesh.position.y = THREE.MathUtils.lerp(
-            mesh.position.y,
-            targetY,
-            0.05
-          );
-
-          // Also drift slightly outward while falling
-          mesh.position.x = THREE.MathUtils.lerp(
-            mesh.position.x,
-            mesh.position.x * 1.15,
-            0.03
-          );
-          mesh.position.z = THREE.MathUtils.lerp(
-            mesh.position.z,
-            mesh.position.z * 1.15,
-            0.03
-          );
-        }
-      });
-    }
-  });
-
-  // ⚡ Title animation
+  // ⚡ Spring for title fade
   const { scale, opacity } = useSpring({
     scale: hasClicked ? 0.7 : 1,
     opacity: hasClicked ? 0 : 1,
     config: { mass: 1, tension: 90, friction: 20 },
   });
 
-  // 🌐 Click anywhere
+  // 🖱️ Smooth mouse-driven spotlight + ball animation
+  useFrame((_, delta) => {
+    const light = movingLight.current;
+    const group = ballGroup.current;
+    if (light) {
+      tempVec.set(mouse.x * viewport.width, mouse.y * viewport.height - 0.5, 6);
+      light.position.lerp(tempVec, 0.15);
+    }
+
+    if (!group) return;
+    const time = performance.now() * 0.0004;
+    const lerpFactor = hasClicked ? 0.05 : 0.1;
+
+    for (let i = 0; i < group.children.length; i++) {
+      const mesh = group.children[i] as THREE.Mesh;
+
+      if (!hasClicked) {
+        mesh.position.x = Math.sin(time + i) * 1.5;
+        mesh.position.z = Math.cos(time + i) * 1.5;
+        mesh.rotation.x += 0.02;
+        mesh.rotation.y += 0.03;
+      } else {
+        mesh.rotation.x += 0.15;
+        mesh.rotation.y += 0.18;
+        mesh.rotation.z += 0.18;
+
+        const targetY = fallTargets[i];
+        mesh.position.y = THREE.MathUtils.lerp(
+          mesh.position.y,
+          targetY,
+          lerpFactor
+        );
+
+        mesh.position.x *= 1 + 0.015 * delta * 60;
+        mesh.position.z *= 1 + 0.015 * delta * 60;
+      }
+    }
+  });
+
+  // 🌐 Global click handler (only once)
   useEffect(() => {
-    const handleFullClick = () => {
-      if (!hasClicked) onClick();
-    };
-    window.addEventListener("click", handleFullClick);
-    return () => window.removeEventListener("click", handleFullClick);
+    const handleClick = () => !hasClicked && onClick();
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
   }, [hasClicked, onClick]);
 
-  // 🎨 Painted number textures (ball color + number)
+  // 🎱 Pre-painted textures (memoized)
   const ballData = useMemo(
     () => [
       { color: "#ff0000", number: 1 },
@@ -116,54 +100,46 @@ export default function TitleScene({
 
   const paintedTextures = useMemo(() => {
     return ballData.map(({ color, number }) => {
-      const size = 256;
+      const size = 128;
       const canvas = document.createElement("canvas");
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext("2d")!;
 
-      // Base ball color
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, size, size);
 
-      // White circle
       ctx.beginPath();
       ctx.fillStyle = "white";
       ctx.arc(size / 2, size / 2, size * 0.12, 0, Math.PI * 2);
       ctx.fill();
 
-      // Number
       ctx.fillStyle = color === "#000000" ? "white" : "black";
       ctx.font = `${size * 0.2}px Arial Black`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(number.toString(), size / 2, size / 2 + size * 0.05);
 
-      // Texture
       const texture = new THREE.CanvasTexture(canvas);
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 1);
-      texture.needsUpdate = true;
-
+      texture.anisotropy = gl.capabilities.getMaxAnisotropy();
       return texture;
     });
-  }, [ballData]);
+  }, [ballData, gl]);
 
   return (
     <a.group scale={scale} position={[0, 0.2, 0]}>
-      {/* 🎯 Title group */}
-      <group position={[0, 0, 0]} receiveShadow castShadow>
+      <group>
         <Center position={[0, 0.5, 0]}>
-          <a.mesh ref={textRef} castShadow receiveShadow>
+          <a.mesh ref={textRef}>
             <Text3D
               font="/font.json"
-              size={0.55}
-              height={0.08}
+              size={0.5}
+              height={0.06}
               bevelEnabled
-              bevelThickness={0.04}
-              bevelSize={0.015}
-              bevelSegments={12}
-              curveSegments={24}
+              bevelThickness={0.025}
+              bevelSize={0.012}
+              bevelSegments={6} // halved
+              curveSegments={12} // halved
             >
               EIGHTFOLD
               <a.meshStandardMaterial
@@ -172,29 +148,28 @@ export default function TitleScene({
                 roughness={0.1}
                 opacity={opacity}
                 transparent
-                envMapIntensity={3}
+                envMapIntensity={2}
               />
             </Text3D>
           </a.mesh>
         </Center>
 
-        {/* Subtitle */}
-        <a.group position={[0, -0.1 , 0]}>
+        <a.group position={[0, -0.1, 0]}>
           <Text
-            color={"#5aff6a"}
-            fontSize={0.15}
+            color="#5aff6a"
+            fontSize={0.14}
             letterSpacing={0.01}
             anchorX="center"
-            fontStyle="italic"
             anchorY="middle"
-            outlineWidth={0.005}
+            fontStyle="italic"
+            outlineWidth={0.004}
             outlineColor="#003300"
           >
             {hasClicked ? "Racking up..." : "Click anywhere to break"}
           </Text>
         </a.group>
 
-        {/* 🎱 Painted numbered balls */}
+        {/* 🎱 Billiard balls */}
         <group ref={ballGroup} position={[0, -0.6, 0]}>
           {paintedTextures.map((texture, i) => (
             <mesh
@@ -206,61 +181,40 @@ export default function TitleScene({
               ]}
               castShadow
             >
-              <sphereGeometry args={[0.18, 64, 64]} />
-              <meshPhysicalMaterial
+              <sphereGeometry args={[0.18, 32, 32]} /> {/* halved segments */}
+              <meshStandardMaterial
                 map={texture}
                 metalness={0.1}
                 roughness={0.25}
-                envMapIntensity={1.5}
+                envMapIntensity={1.2}
               />
             </mesh>
           ))}
         </group>
       </group>
 
-      {/* 💡 Warm cinematic lighting */}
+      {/* 💡 Simplified Lighting */}
       <spotLight
         ref={movingLight}
         position={[0, 2, 4]}
-        intensity={45}
+        intensity={15}
         angle={0.45}
-        penumbra={1}
-        color={"#ffcc88"}
+        penumbra={0.8}
+        color="#ffcc88"
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
       />
-      <directionalLight
-        position={[-3, 2, 3]}
-        intensity={0.7}
-        color="#aaffaa"
-        castShadow
-      />
-      <ambientLight intensity={0.25} color="#222222" />
-      <Environment preset="studio" />
+      <Environment preset="warehouse" />
 
-      {/* 🌫️ Fog & Atmosphere */}
-      <fog attach="fog" args={["#090707", 3, 10]} />
-
-      {/* 🎬 Postprocessing */}
-      <EffectComposer>
-        <Bloom
-          intensity={0.25}
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.8}
-          mipmapBlur
-          radius={0.1}
-        />
+      {/* 🎬 Lightweight Postprocessing */}
+      <EffectComposer multisampling={0}>
+        <Bloom intensity={0.4} luminanceThreshold={0.25} radius={0.15} />
         <ChromaticAberration
           blendFunction={BlendFunction.NORMAL}
-          offset={[0.002, 0.0012]}
+          offset={[0.001, 0.001]}
         />
-        <Vignette
-          offset={0.4}
-          darkness={0.9}
-          eskil={false}
-          blendFunction={BlendFunction.NORMAL}
-        />
+        <Noise opacity={0.1} />
       </EffectComposer>
     </a.group>
   );
