@@ -20,6 +20,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
 
   return (
     <group {...props} dispose={null}>
+      {/* Table */}
       <group position={[0.274, 0, -0.057]} rotation={[0, 0.547, 0]}>
         <mesh
           castShadow
@@ -59,46 +60,8 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
         />
       </group>
 
-      <group position={[0.338, 0.791, 0.049]} rotation={[0, 1.543, -0.002]}>
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_43.geometry}
-          material={materials.Maple_wood_texture}
-        />
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_44.geometry}
-          material={materials.Leather_Brown}
-        />
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_45.geometry}
-          material={materials.Handle}
-        />
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_46.geometry}
-          material={materials.Cover}
-        />
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_47.geometry}
-          material={materials.Car_rubber_wheel}
-        />
-        <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Object_48.geometry}
-          material={materials.Linen}
-        />
-      </group>
-
-      <group position={[1.284, 0.599, 0.043]} rotation={[0, 0.547, -1.263]}>
+      {/* Stick */}
+      <group position={[0.9, 0.85, 1]} rotation={[0, Math.PI / 2 + 0.55, 0]}>
         <mesh
           castShadow
           receiveShadow
@@ -137,15 +100,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
         />
       </group>
 
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Object_4.geometry}
-        material={materials.balls}
-        position={[-0.031, 0.818, -0.523]}
-        rotation={[-Math.PI, -0.547, -1.895]}
-        scale={0.239}
-      />
+      {/* Triangle Plastic */}
       <mesh
         castShadow
         receiveShadow
@@ -155,6 +110,19 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
         rotation={[-Math.PI, -0.547, -Math.PI]}
         scale={0.239}
       />
+
+      {/* Balls */}
+
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Object_4.geometry}
+        material={materials.balls}
+        position={[-0.031, 0.818, -0.523]}
+        rotation={[-Math.PI, -0.547, -1.895]}
+        scale={0.239}
+      />
+
       <mesh
         castShadow
         receiveShadow
@@ -286,4 +254,3 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
 }
 
 useGLTF.preload("/models/Table.glb");
-
