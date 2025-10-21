@@ -1,5 +1,5 @@
 import { a, useSpring } from "@react-spring/three";
-import { Loader, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 import * as THREE from "three";
 import Table from "./components/models/Table";
 import Ambience from "./components/scene/Ambience";
+import LoadingScreen from "./components/scene/Loading-Screen";
 import TitleScene from "./components/scene/Title-Scene";
 
 export default function App() {
@@ -53,7 +54,7 @@ export default function App() {
           outputColorSpace: THREE.SRGBColorSpace,
         }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={<LoadingScreen />}>
           <Ambience />
 
           <AnimatePresence mode="wait">
@@ -90,16 +91,6 @@ export default function App() {
       </Canvas>
 
       {/* 🌀 Loading Bar (Drei Loader) */}
-      <Loader
-        containerStyles={{
-          backgroundColor: "#0e0e0e",
-          color: "#dfdfdf",
-          fontFamily: "monospace",
-        }}
-        innerStyles={{ background: "#b6ff7f" }}
-        barStyles={{ background: "#b6ff7f" }}
-        dataInterpolation={(p) => `Loading ${p.toFixed(0)}%`}
-      />
     </motion.main>
   );
 }
