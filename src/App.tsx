@@ -9,6 +9,7 @@ import Table from "./components/models/Table";
 import Ambience from "./components/scene/Ambience";
 import LoadingScreen from "./components/scene/Loading-Screen";
 import TitleScene from "./components/scene/Title-Scene";
+import CanvasGrid from "./components/scene/helpers/canvas-grid";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +44,7 @@ export default function App() {
       initial="dark"
     >
       <Canvas
+        className=" z-10"
         shadows
         frameloop="always"
         dpr={[1, 1.5]}
@@ -89,8 +91,9 @@ export default function App() {
           />
         </Suspense>
       </Canvas>
-
-      {/* 🌀 Loading Bar (Drei Loader) */}
+      <AnimatePresence>
+        {!hasClicked && <CanvasGrid key="grid" isVisible={!hasClicked} />}
+      </AnimatePresence>
     </motion.main>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { a, useSpring } from "@react-spring/three";
 import { Center, Environment, Text, Text3D } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -84,8 +86,8 @@ export default function TitleScene({
               bevelEnabled
               bevelThickness={0.025}
               bevelSize={0.012}
-              bevelSegments={6} // halved
-              curveSegments={12} // halved
+              bevelSegments={6}
+              curveSegments={12}
             >
               EIGHTFOLD
               <a.meshStandardMaterial
