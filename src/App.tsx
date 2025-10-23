@@ -15,13 +15,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasClicked, setHasClicked] = useState(false);
 
-  // 🌗 Background animation using Framer Motion
   const bgVariants = {
     dark: { backgroundColor: "#0e0e0e", transition: { duration: 1.2 } },
     light: { backgroundColor: "#f1f1f1", transition: { duration: 1.2 } },
   };
 
-  // 🎞️ Table 3D entrance animation
   const tableSpring = useSpring({
     scale: isLoading ? 0 : 1,
     rotationX: isLoading ? Math.PI * 0.3 : 0,
@@ -31,7 +29,6 @@ export default function App() {
   const handleClick = () => {
     if (!hasClicked) {
       setHasClicked(true);
-      // Smooth transition delay for title fade-out
       setTimeout(() => setIsLoading(false), 1300);
     }
   };
@@ -67,7 +64,6 @@ export default function App() {
                 hasClicked={hasClicked}
               />
             ) : (
-              // ✅ Physics world wraps the table and related bodies
               <Physics key="table" gravity={[0, -9.81, 0]} debug>
                 <a.group
                   scale={tableSpring.scale}
@@ -87,7 +83,7 @@ export default function App() {
             maxDistance={5}
             enableZoom={!isLoading}
             enablePan={!isLoading}
-            enabled={!isLoading} // disables orbit control when loading
+            enabled={!isLoading}
           />
         </Suspense>
       </Canvas>

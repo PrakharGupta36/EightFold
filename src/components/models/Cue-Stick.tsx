@@ -28,7 +28,7 @@ export function CueStick({ nodes, materials }: { nodes: any; materials: any }) {
       friction={0.6}
       restitution={0.3}
     >
-      <group rotation={[0, Math.PI / 2 + 0.55, 0]}>
+      <group position={[0, 0.05, 0]} rotation={[0, Math.PI / 2 + 0.8, 0]}>
         <mesh
           geometry={nodes.Object_50.geometry}
           material={materials.Maple_wood_texture}

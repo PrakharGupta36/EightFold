@@ -117,9 +117,9 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
   return (
     <group {...props} dispose={null}>
       {/* 🪵 TABLE (collider appears after small delay for perfect alignment) */}
-      <group position={[0.274, 0, -0.057]} rotation={[0, 0.547, 0]}>
+      <group position={[0.274, 0, -0.057]} rotation={[0, 0.547, 0]} scale={1.1}>
         {readyTable ? (
-          <RigidBody type="fixed" colliders="trimesh">
+          <RigidBody type="fixed" colliders="trimesh" >
             {TableGeometry}
           </RigidBody>
         ) : (
