@@ -16,9 +16,9 @@ export default function CanvasGrid({ isVisible }: { isVisible: boolean }) {
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>(null);
 
-  const CELL_SIZE = 20;
+  const CELL_SIZE = 10;
   const SPACING = 25;
-  const INTERACTION_RADIUS = 70;
+  const INTERACTION_RADIUS = 150;
   const GRID_COLOR = "#000000";
   const GLOW_COLOR = "#22f237";
 
@@ -95,13 +95,13 @@ export default function CanvasGrid({ isVisible }: { isVisible: boolean }) {
 
         if (cell.currentGlow > 0.01) {
           ctx.strokeStyle = `rgba(89, 202, 110, ${cell.currentGlow})`;
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 0.1;
           ctx.strokeRect(cell.x - offset, cell.y - offset, size, size);
           ctx.fillStyle = GLOW_COLOR;
 
-          ctx.shadowColor = `rgba(89, 202, 110, ${cell.currentGlow * 0.6})`;
-          ctx.shadowBlur = 10;
-          ctx.fillStyle = `rgba(89, 202, 110, ${cell.currentGlow * 0.1})`;
+          ctx.shadowColor = `rgba(89, 202, 110, ${cell.currentGlow * 1})`;
+          ctx.shadowBlur = 5;
+          ctx.fillStyle = `rgba(89, 202, 110, ${cell.currentGlow * .5})`;
           ctx.fillRect(cell.x - offset, cell.y - offset, size, size);
           ctx.shadowBlur = 0;
         }
