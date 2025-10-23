@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 interface CueBallProps {
   position?: [number, number, number];
   radius?: number;
-  delay?: number;
+  delay?: number; // optional delay for physics initialization
 }
 
-export function CueBall({ radius = 0.03, delay = 800 }: CueBallProps) {
+export function CueBall({ radius = 0.032, delay = 800 }: CueBallProps) {
   const [ready, setReady] = useState(false);
 
+  // Delay spawn to wait for table collider readiness
   useEffect(() => {
     const timeout = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timeout);
@@ -29,7 +30,7 @@ export function CueBall({ radius = 0.03, delay = 800 }: CueBallProps) {
       position={[0.6, 1, 0.5]}
     >
       <BallCollider args={[radius]} />
-      <mesh castShadow receiveShadow>
+      <mesh castShadow receiveShadow scale={.7}>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
           color="#ffffff"
