@@ -67,7 +67,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
       const timeout = setTimeout(() => {
         setReadyTable(true);
         console.log("✅ Table collider initialized after delay");
-      }, 600); // tweak as needed
+      }, 900); // tweak as needed
       return () => clearTimeout(timeout);
     }
   }, [nodes]);
