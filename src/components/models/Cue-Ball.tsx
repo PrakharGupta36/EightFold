@@ -1,25 +1,34 @@
+import { useFrame } from "@react-three/fiber";
+import type { RapierRigidBody } from "@react-three/rapier";
 import { BallCollider, RigidBody } from "@react-three/rapier";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CueBallProps {
   position?: [number, number, number];
   radius?: number;
-  delay?: number; // optional delay for physics initialization
+  delay?: number;
 }
 
-export function CueBall({ radius = 0.032, delay = 800 }: CueBallProps) {
+export function CueBall({ radius = 0.032, delay = 900 }: CueBallProps) {
   const [ready, setReady] = useState(false);
+  const rigidBodyRef = useRef<RapierRigidBody>(null);
 
-  // Delay spawn to wait for table collider readiness
   useEffect(() => {
     const timeout = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timeout);
   }, [delay]);
 
+  useFrame(() => {
+    if (rigidBodyRef.current) {
+      rigidBodyRef.current.translation();
+    }
+  });
+
   if (!ready) return null;
 
   return (
     <RigidBody
+      ref={rigidBodyRef}
       type="dynamic"
       colliders="ball"
       restitution={0.6}
@@ -28,9 +37,13 @@ export function CueBall({ radius = 0.032, delay = 800 }: CueBallProps) {
       angularDamping={0.2}
       mass={0.17}
       position={[0.6, 1, 0.5]}
+      onCollisionEnter={(e) => {
+        const body = e.rigidBody;
+        if (body) console.log("Collision started at:", body.translation());
+      }}
     >
       <BallCollider args={[radius]} />
-      <mesh castShadow receiveShadow scale={.7}>
+      <mesh castShadow receiveShadow scale={0.7}>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
           color="#ffffff"

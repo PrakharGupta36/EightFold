@@ -7,13 +7,20 @@ import { a, useSpring } from "@react-spring/three";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import { Fragment, useEffect, useMemo, useRef, useState, type JSX } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
 import type { Material, Mesh } from "three";
 import * as THREE from "three";
 import type { GLTF } from "three-stdlib";
 
-import { CueStick } from "./Cue-Stick";
 import { CueBall } from "./Cue-Ball";
+import { CueStick } from "./Cue-Stick";
 
 interface GLTFResult extends GLTF {
   nodes: Record<string, Mesh>;
@@ -25,14 +32,11 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     "/models/Table.glb"
   ) as unknown as GLTFResult;
 
-  // ⚙️ State
   const [readyTable, setReadyTable] = useState(false);
   const [visible, setVisible] = useState(true);
   const [removed, setRemoved] = useState(false);
-
   const triMatRef = useRef<THREE.MeshStandardMaterial>(null);
 
-  // 🌀 Triangle animation
   const { opacity, scale } = useSpring({
     opacity: visible ? 1 : 0,
     scale: visible ? 1 : 0.6,
@@ -40,18 +44,15 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     onRest: () => !visible && setRemoved(true),
   });
 
-  // 🔄 Animate opacity every frame
   useFrame(() => {
     if (triMatRef.current) triMatRef.current.opacity = opacity.get();
   });
 
-  // ⏱ Fade triangle after 2s
   useEffect(() => {
     const fadeTimer = setTimeout(() => setVisible(false), 2000);
     return () => clearTimeout(fadeTimer);
   }, []);
 
-  // 🧪 Clone triangle material
   const triMaterial = useMemo(() => {
     const mat = (materials.plastic as THREE.MeshStandardMaterial).clone();
     mat.transparent = true;
@@ -61,18 +62,16 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     return mat;
   }, [materials.plastic]);
 
-  // 🕒 Delay collider creation until model + transforms settle
   useEffect(() => {
     if (nodes.Object_36?.geometry) {
       const timeout = setTimeout(() => {
         setReadyTable(true);
         console.log("✅ Table collider initialized after delay");
-      }, 900); // tweak as needed
+      }, 900);
       return () => clearTimeout(timeout);
     }
   }, [nodes]);
 
-  // 🧱 Table geometry (visual only)
   const TableGeometry = (
     <>
       <mesh
@@ -119,7 +118,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
       {/* 🪵 TABLE (collider appears after small delay for perfect alignment) */}
       <group position={[0.274, 0, -0.057]} rotation={[0, 0.547, 0]} scale={1.1}>
         {readyTable ? (
-          <RigidBody type="fixed" colliders="trimesh" >
+          <RigidBody type="fixed" colliders="trimesh">
             {TableGeometry}
           </RigidBody>
         ) : (
