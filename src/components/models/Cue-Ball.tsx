@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 interface CueBallProps {
   position?: [number, number, number];
   radius?: number;
-  delay?: number; // optional delay for physics initialization
+  delay?: number;
 }
 
 export function CueBall({ radius = 0.03, delay = 800 }: CueBallProps) {
   const [ready, setReady] = useState(false);
 
-  // Delay spawn to wait for table collider readiness
   useEffect(() => {
     const timeout = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timeout);

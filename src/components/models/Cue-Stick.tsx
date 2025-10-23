@@ -11,11 +11,9 @@ export function CueStick({ nodes, materials }: { nodes: any; materials: any }) {
   useFrame(({ pointer, viewport }) => {
     if (!stickRef.current) return;
 
-    // Map mouse movement to 3D space
     const x = pointer.x * viewport.width * 0.5;
     const z = -pointer.y * viewport.height * 0.5;
 
-    // Smooth motion
     target.set(x, 0.85, z + 1);
     stickRef.current.setNextKinematicTranslation(target);
   });
