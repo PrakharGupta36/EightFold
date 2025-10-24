@@ -1,7 +1,7 @@
 "use client";
 
 import { a, useSpring } from "@react-spring/three";
-import { Center, Environment, Text, Text3D } from "@react-three/drei";
+import { Center, Environment, Text3D } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
   Bloom,
@@ -10,14 +10,14 @@ import {
   Noise,
 } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 export default function TitleScene({
-  onClick,
+  
   hasClicked,
 }: {
-  onClick: () => void;
+  // onClick: () => void;
   hasClicked: boolean;
 }) {
   const textRef = useRef<THREE.Mesh>(null!);
@@ -67,13 +67,6 @@ export default function TitleScene({
     }
   });
 
-  // 🌐 Global click handler (only once)
-  useEffect(() => {
-    const handleClick = () => !hasClicked && onClick();
-    window.addEventListener("click", handleClick);
-    return () => window.removeEventListener("click", handleClick);
-  }, [hasClicked, onClick]);
-
   return (
     <a.group scale={scale} position={[0, -0.2, 0]}>
       <group>
@@ -101,21 +94,6 @@ export default function TitleScene({
             </Text3D>
           </a.mesh>
         </Center>
-
-        <a.group position={[0, 0.1, 0]}>
-          <Text
-            color="#5aff6a"
-            fontSize={0.12}
-            letterSpacing={0.01}
-            anchorX="center"
-            anchorY="middle"
-            fontStyle="italic"
-            outlineWidth={0.004}
-            outlineColor="#003300"
-          >
-            {hasClicked ? "Racking up..." : "Click anywhere to start"}
-          </Text>
-        </a.group>
       </group>
 
       {/* 💡 Simplified Lighting */}

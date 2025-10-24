@@ -1,19 +1,31 @@
+import RAPIER from "@dimforge/rapier3d-compat";
 import { a, useSpring } from "@react-spring/three";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion } from "framer-motion";
-import { Suspense, useState } from "react";
+import { Fragment, Suspense, useEffect, useState } from "react";
 import * as THREE from "three";
+
 import Table from "./components/models/Table";
 import Ambience from "./components/scene/Ambience";
 import LoadingScreen from "./components/scene/Loading-Screen";
 import TitleScene from "./components/scene/Title-Scene";
 import CanvasGrid from "./components/scene/helpers/canvas-grid";
+import GameMenu from "./components/scene/helpers/game-menu";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasClicked, setHasClicked] = useState(false);
+  const [rapierReady, setRapierReady] = useState(false);
+
+  // ✅ PRELOAD RAPiER WASM
+  useEffect(() => {
+    RAPIER.init().then(() => {
+      console.log("✅ Rapier initialized successfully");
+      setRapierReady(true);
+    });
+  }, []);
 
   const bgVariants = {
     dark: { backgroundColor: "#0e0e0e", transition: { duration: 1.2 } },
@@ -33,6 +45,15 @@ export default function App() {
     }
   };
 
+  // ✅ Wait until Rapier is initialized before rendering Canvas
+  if (!rapierReady) {
+    return (
+      <div className="grid place-items-center h-screen text-gray-200 bg-[#0e0e0e] font-sans">
+        <p>Loading physics engine...</p>
+      </div>
+    );
+  }
+
   return (
     <motion.main
       className="grid place-items-center h-screen text-[#121212] font-sans"
@@ -41,7 +62,7 @@ export default function App() {
       initial="dark"
     >
       <Canvas
-        className=" z-10"
+        className="z-10"
         shadows
         frameloop="always"
         dpr={[1, 1.5]}
@@ -56,23 +77,21 @@ export default function App() {
         <Suspense fallback={<LoadingScreen />}>
           <Ambience />
 
-          <AnimatePresence mode="wait">
-            {isLoading ? (
-              <TitleScene
-                key="title"
-                onClick={handleClick}
-                hasClicked={hasClicked}
-              />
-            ) : (
-              <Physics key="table" gravity={[0, -9.81, 0]} debug>
-                <a.group
-                  scale={tableSpring.scale}
-                  rotation-x={tableSpring.rotationX}
-                >
-                  <Table position={[-0.35, 0, 0]} />
-                </a.group>
-              </Physics>
+          {/* ✅ Keep Physics always mounted (no AnimatePresence switching) */}
+          <Physics gravity={[0, -9.81, 0]}>
+            {!isLoading && (
+              <a.group
+                scale={tableSpring.scale}
+                rotation-x={tableSpring.rotationX}
+              >
+                <Table position={[-0.35, 0, 0]} />
+              </a.group>
             )}
+          </Physics>
+
+          {/* Keep title outside of physics world */}
+          <AnimatePresence mode="wait">
+            {isLoading && <TitleScene key="title" hasClicked={hasClicked} />}
           </AnimatePresence>
 
           <OrbitControls
@@ -87,8 +106,14 @@ export default function App() {
           />
         </Suspense>
       </Canvas>
+
       <AnimatePresence>
-        {!hasClicked && <CanvasGrid key="grid" isVisible={!hasClicked} />}
+        {!hasClicked && (
+          <Fragment>
+            <CanvasGrid key="grid" isVisible={!hasClicked} />
+            <GameMenu onClick={handleClick} />
+          </Fragment>
+        )}
       </AnimatePresence>
     </motion.main>
   );
