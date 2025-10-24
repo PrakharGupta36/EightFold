@@ -2,9 +2,8 @@ import { Html, useProgress } from "@react-three/drei";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function LoadingScreen() {
-    const { progress } = useProgress();
-    
-    
+  const { progress } = useProgress();
+
   return (
     <AnimatePresence>
       <Html
