@@ -167,7 +167,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
     };
 
     return (
-      <group position={[0, 0.1, 0]}>
+      <group position={[0, 0.08, 0]}>
         {ballData.map((b, i) => {
           const geometry = nodes[`Object_${b.id}`]?.geometry;
           const material = materials[b.mat || "balls"] || materials.balls;
@@ -230,7 +230,7 @@ export default function Table(props: JSX.IntrinsicElements["group"]) {
 
       {/* 🔺 Triangle Rack (load first, correct transform) */}
       {!removed && (
-        <group position={[0, 0.1, 0]}>
+        <group position={[0, 0.08, 0]}>
           <RigidBody
             type="fixed"
             colliders="trimesh"
