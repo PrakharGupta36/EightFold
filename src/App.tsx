@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { a, useSpring } from "@react-spring/three";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, useProgress } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,6 +18,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasClicked, setHasClicked] = useState(false);
   const [rapierReady, setRapierReady] = useState(false);
+  const { progress } = useProgress();
 
   // ✅ PRELOAD RAPiER WASM
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function App() {
   if (!rapierReady) {
     return (
       <div className="grid place-items-center h-screen text-gray-200 bg-[#0e0e0e] font-sans">
-        <p>Loading physics engine...</p>
+        {/* <p>Loading physics engine...</p> */}
       </div>
     );
   }
@@ -108,7 +109,7 @@ export default function App() {
       </Canvas>
 
       <AnimatePresence>
-        {!hasClicked && (
+        {!hasClicked && progress >= 100 && (
           <Fragment>
             <CanvasGrid key="grid" isVisible={!hasClicked} />
             <GameMenu onClick={handleClick} />

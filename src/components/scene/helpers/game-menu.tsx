@@ -38,13 +38,13 @@ export default function GameMenu({ onClick }: { onClick: () => void }) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
               className="flex gap-6 pointer-events-auto"
             >
               {/* Play Local */}
               <Button
                 onClick={() => setMenuState("local")}
-                className={`${baseButton} hover:text-[#9af222]`}
+                className={`${baseButton} cursor-pointer  hover:text-[#9af222]`}
               >
                 Play Local
               </Button>
@@ -53,7 +53,7 @@ export default function GameMenu({ onClick }: { onClick: () => void }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className={`${baseButton} text-[#555] cursor-not-allowed hover:text-[#666]`}
+                    className={`${baseButton} cursor-auto text-[#555]  hover:text-[#666]`}
                   >
                     Play Online
                   </Button>
@@ -75,14 +75,17 @@ export default function GameMenu({ onClick }: { onClick: () => void }) {
               transition={{ duration: 0.4 }}
               className="flex flex-col items-center gap-5 pointer-events-auto mt-39"
             >
-              <Button className={`${baseButton} hover:text-[#9af222]`} onClick={onClick}>
-                Play on the same device
+              <Button
+                className={`${baseButton} cursor-pointer hover:text-[#9af222]`}
+                onClick={onClick}
+              >
+                Play on this device
               </Button>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className={`${baseButton} text-[#555] cursor-not-allowed hover:text-[#666]`}
+                    className={`${baseButton} cursor-auto text-[#555] hover:text-[#666]`}
                   >
                     Join a room
                   </Button>
@@ -95,7 +98,7 @@ export default function GameMenu({ onClick }: { onClick: () => void }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className={`${baseButton} text-[#555] cursor-not-allowed hover:text-[#666]`}
+                    className={`${baseButton} cursor-auto  text-[#555]  hover:text-[#666]`}
                   >
                     Make a room
                   </Button>
@@ -108,7 +111,7 @@ export default function GameMenu({ onClick }: { onClick: () => void }) {
               {/* Back button */}
               <Button
                 onClick={() => setMenuState("main")}
-                className={`${baseButton} bg-[#616163]/90 text-white cursor-not-allowed hover:text-[#9af222]`}
+                className={`${baseButton} cursor-pointer bg-[#616163]/90 text-white  hover:text-[#9af222]`}
               >
                 ← Back
               </Button>
