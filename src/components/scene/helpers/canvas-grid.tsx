@@ -101,7 +101,7 @@ export default function CanvasGrid({ isVisible }: { isVisible: boolean }) {
 
           ctx.shadowColor = `rgba(89, 202, 110, ${cell.currentGlow * 1})`;
           ctx.shadowBlur = 5;
-          ctx.fillStyle = `rgba(89, 202, 110, ${cell.currentGlow * .5})`;
+          ctx.fillStyle = `rgba(89, 202, 110, ${cell.currentGlow * 0.5})`;
           ctx.fillRect(cell.x - offset, cell.y - offset, size, size);
           ctx.shadowBlur = 0;
         }
